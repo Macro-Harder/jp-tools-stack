@@ -1,0 +1,137 @@
+regression-corpus-gate 1.0.0
+re-ruled pass: The amendment may go forward because every fail is excused by a confirmed re-ruling that names its incident.
+blocked items: none
+filing: RE-RULED
+next step: The caller files this record into the trace the standing procedure names. This record informs a closure decision and makes none.
+exit status: 5
+coverage:
+indexes searched: Gap 1, Gap 99, FM-1
+rows checked: 3 distinct rows
+rows not checked: 3
+indexes not searched: Gap 2, Gap 3, Gap 50, FM-2
+runner: Example Runner Seat
+judge of record: Example Judge Seat
+panel judges: none
+wording author: Example Author Seat
+ruler: Example Ruler Seat
+step coordinator: Example Coordinator Seat
+reader designate: Example Reader Seat
+declarer: Example Declarer Seat
+confirming seat: Example Confirmer Seat
+auditor oversight: a fresh Auditor oversees this run after reading the corpus and the wording set first hand, under the procedure of part 4.6. The overseeing seat and the fact of that reading are attested outside this record in the filed trace; this record states the duty and does not record that the oversight or the reading has happened.
+corpus path: /home/hatch/workspace/tools/regression-corpus-gate/examples/example_corpus.md
+amendment path: /home/hatch/workspace/tools/regression-corpus-gate/examples/example_amendment.md
+declaration path: /home/hatch/workspace/tools/regression-corpus-gate/examples/example_declaration.txt
+verdicts path: /home/hatch/workspace/tools/regression-corpus-gate/examples/example_verdicts.txt
+queue path: /home/hatch/workspace/tools/regression-corpus-gate/examples/example_queue.md
+corpus fingerprint: a243f4a2c9fce49eb8ef6ce35c7ebee72b1ffef17dbbe2b143c6ec763afbddf9
+amendment fingerprint: ad0e340d77b15d8b080f258e64dc149f173b5c28b582f4d2bec44e4008a5effe
+declaration fingerprint: f3168582cc2fd82defbca95c47bedc7ed21da77d719757d6fe37cff53f857de5
+verdicts fingerprint: bc5e5030cf41ad130278525cbb49344c321f9ae3771b4534d5cacf1183acaa85
+queue fingerprint: bdade1f306baae6e4ccb613fc9f1ddadaa3eb39c3f21bf236c07ee10293a02ba
+corpus rows as read: 6
+declared mode: subset
+effective mode: subset
+triggers fired: none
+gate amendment run: no
+attested tier: Low
+attested context: stated
+change index system: no
+change gate rule: no
+change corpus: no
+change definition: no
+change counting method: no
+change verdict form: no
+change closure rule: no
+attester: Example Runner Seat
+selection readback
+declarer: Example Declarer Seat
+confirming seat: Example Confirmer Seat
+item A1: declared: Gap 1, Gap 99; extracted: none; rows selected: 2
+basis for A1 Gap 1: Basis prose for Gap 1 on A1.
+basis for A1 Gap 99: Basis prose for Gap 99 on A1.
+item A2: declared: FM-1; extracted: none; rows selected: 1
+basis for A2 FM-1: Basis prose for FM-1 on A2.
+distinct rows selected: 3
+index Gap 1: 2 rows
+index Gap 99: 0 rows
+index FM-1: 1 rows
+rows selected by more than one index: none
+related but not selected: none
+this page shows what the declaration and the tripwire produced; a declaration wrong in a way no tripwire catches is not guarded by this page; it is guarded by the runner confirmation and the Auditor addition right
+self test
+probe selection_probe: pass
+probe pass_probe: pass
+probe blocking_probe: pass
+probe excused_fail_probe: pass
+probe binding_probe: pass
+self test results are counted separately from corpus checks
+The self test proves the selection, the blocking arithmetic including the excused fail path, and the binding checks, over synthetic cases only, and proves nothing about the judging. In this line, selection means the one token, one item synthetic case of the selection probe, and binding checks means the one fingerprint alteration of the binding probe; no probe exercises the other binding values, the per item form of selection across several items, or any other part.
+re-ruling matches
+candidate for C-003: DQ-201, status as read RULED, closed, heading: ### DQ-201: a ruled entry naming one row, entry lines 3 to 9
+match: A1, C-003, DQ-201, 2026-11-01, status as read RULED, closed, confirming judge Example Judge Seat, incident: Gamma incident happened
+a confirmed re-ruling excuses only the named corpus ID and incident through the decision queue
+matches: 1, unverified excuses: 0
+no entry in the queue as read carries the status standing
+checked rows
+row C-001 for item A1
+pass procedure: Inspect the amendment for the named shape; fail if the amendment permits the named failure shape.
+verdict: PASS
+judge: Example Judge Seat
+clause applied: fail if the amendment permits the named failure shape.
+reason: The row was judged on its own procedure.
+trace excerpt: PASS
+row C-003 for item A1
+incident: Gamma incident happened
+pass procedure: Inspect the amendment for the named shape; fail if the counts do not reconcile at the end.
+verdict: FAIL
+judge: Example Judge Seat
+clause applied: fail if the counts do not reconcile at the end.
+reason: The amendment permits the named failure shape.
+trace excerpt: RE-RULED, queue item DQ-201
+row C-002 for item A2
+pass procedure: Inspect the amendment for the named shape; fail if the row is judged by a seat with a conflict.
+verdict: PASS
+judge: Example Judge Seat
+clause applied: fail if the row is judged by a seat with a conflict.
+reason: The row was judged on its own procedure.
+trace excerpt: PASS
+item outcomes
+item A1: re-ruled pass
+item A2: pass
+counts
+checks run: 3
+passed: 2
+failed: 1
+failed excused: 1
+failed unexcused: 0
+unjudgeable: 0
+missing: 0
+limits
+a judge whose reasoning is wrong while the forms are complete is not detectable by this program; the layered answer is the fresh Auditor oversight of part 4.6 and the reader designate duty of part 5.4
+a declaration wrong from the start in a way no tripwire catches is not guarded by the readback page; the layered answer is the runner confirmation and the Auditor addition right
+corpus dialects as read: Annex 1: Gap tokens only 1 rows, FM tokens only 1 rows, both kinds 1 rows; Annex 2: Gap tokens only 3 rows
+clause family as read: fail if the amendment permits the named failure shape., 2 rows
+clause family as read: fail if the row is judged by a seat with a conflict., 2 rows
+clause family as read: fail if the counts do not reconcile at the end., 2 rows
+declared tokens that selected no row: Gap 99
+no entry in the queue as read carries the status standing
+the verdicts binding carries no run identifier in version 1; a verdicts input from an earlier run over unchanged inputs verifies against a later run over the same inputs
+a corpus content change that keeps the structure valid is visible only as a different fingerprint
+index tokens written in forms outside the tripwire extraction grammar are not extracted; ranges and compressed lists are outside the grammar
+judge fatigue across a long run is not detectable by this program; judging may proceed in sittings, and sittings change pacing and never the bar
+trigger facts are attestations by the runner; a wrong attestation is not detectable by this program; the layered answer is the Auditor oversight, the dispute attestation, and the record printing the attested facts beside the attester name
+sizing as measured: Gap 1 selects 159 rows, the Gap 1 to 4 union selects 218 rows, FM tokens together reach 34 rows, and a full run checks 224 rows per wording item; record size grows in proportion to rows checked times wording items; no output byte limit applies
+reader designate: Example Reader Seat. An amendment takes effect only after the Auditor, or a named reader who is neither author nor ruler, has read this record. This record names the reader designate; it does not record that the reading has happened.
+auditor oversight: a fresh Auditor oversees this run after reading the corpus and the wording set first hand, under the procedure of part 4.6. The overseeing seat and the fact of that reading are attested outside this record in the filed trace; this record states the duty and does not record that the oversight or the reading has happened.
+glossary
+pass: every checked row passed.
+fail: an unexcused fail blocks the amendment.
+re-ruled pass: a pass that stands only because a confirmed re-ruling excuses every fail.
+incomplete: a checked pair has no verdict, so no gate verdict is issued.
+unverifiable: a checked row could not be judged, or a claimed touch could not be tested.
+barred: a judge is the author, the ruler, or the coordinator, so the run may not proceed.
+checked pair: one corpus row taken with one wording item.
+excused fail: a fail whose incident a confirmed re-ruling names through the decision queue.
+reader designate: the named reader who must read this record outside it before the amendment takes effect.
+gate amendment run: a run whose amendment is attested as changing the gate, its selection rule, its exception rule, or the corpus front matter.

@@ -1,0 +1,29 @@
+amendment-fingerprint: ad0e340d77b15d8b080f258e64dc149f173b5c28b582f4d2bec44e4008a5effe
+corpus-fingerprint: a243f4a2c9fce49eb8ef6ce35c7ebee72b1ffef17dbbe2b143c6ec763afbddf9
+declaration-fingerprint: f3168582cc2fd82defbca95c47bedc7ed21da77d719757d6fe37cff53f857de5
+declared-mode: subset
+effective-mode: subset
+triggers: none
+checked: C-001
+checked: C-002
+checked: C-003
+judge-of-record: Example Judge Seat
+verdict: A1 C-001
+judge: Example Judge Seat
+clause: fail if the amendment permits the named failure shape.
+word: PASS
+reason: The row was judged on its own procedure.
+verdict: A1 C-003
+judge: Example Judge Seat
+clause: fail if the counts do not reconcile at the end.
+word: FAIL
+reason: The amendment permits the named failure shape.
+claim:
+queue-item: DQ-201
+ruling-date: 2026-11-01
+confirming-judge: Example Judge Seat
+verdict: A2 C-002
+judge: Example Judge Seat
+clause: fail if the row is judged by a seat with a conflict.
+word: PASS
+reason: The row was judged on its own procedure.

@@ -1,0 +1,213 @@
+{
+  "tool": "regression-corpus-gate",
+  "version": "1.0.0",
+  "outcome": "re-ruled pass",
+  "exit_status": 5,
+  "trace_word": "RE-RULED",
+  "runner": "Example Runner Seat",
+  "judge_of_record": "Example Judge Seat",
+  "panel_judges": [],
+  "wording_author": "Example Author Seat",
+  "ruler": "Example Ruler Seat",
+  "step_coordinator": "Example Coordinator Seat",
+  "reader_designate": "Example Reader Seat",
+  "declarer": "Example Declarer Seat",
+  "confirming_seat": "Example Confirmer Seat",
+  "fingerprints": {
+    "corpus": "a243f4a2c9fce49eb8ef6ce35c7ebee72b1ffef17dbbe2b143c6ec763afbddf9",
+    "amendment": "ad0e340d77b15d8b080f258e64dc149f173b5c28b582f4d2bec44e4008a5effe",
+    "declaration": "f3168582cc2fd82defbca95c47bedc7ed21da77d719757d6fe37cff53f857de5",
+    "verdicts": "bc5e5030cf41ad130278525cbb49344c321f9ae3771b4534d5cacf1183acaa85",
+    "queue": "bdade1f306baae6e4ccb613fc9f1ddadaa3eb39c3f21bf236c07ee10293a02ba"
+  },
+  "corpus_row_count": 6,
+  "paths": {
+    "corpus": "/home/hatch/workspace/tools/regression-corpus-gate/examples/example_corpus.md",
+    "amendment": "/home/hatch/workspace/tools/regression-corpus-gate/examples/example_amendment.md",
+    "declaration": "/home/hatch/workspace/tools/regression-corpus-gate/examples/example_declaration.txt",
+    "verdicts": "/home/hatch/workspace/tools/regression-corpus-gate/examples/example_verdicts.txt",
+    "queue": "/home/hatch/workspace/tools/regression-corpus-gate/examples/example_queue.md"
+  },
+  "declared_mode": "subset",
+  "effective_mode": "subset",
+  "triggers": [],
+  "gate_amendment_run": false,
+  "attestations": {
+    "attester": "Example Runner Seat",
+    "tier": "Low",
+    "context": "stated",
+    "effective_context": "stated",
+    "change_flags": {
+      "index_system": "no",
+      "gate_rule": "no",
+      "corpus": "no",
+      "definition": "no",
+      "counting_method": "no",
+      "verdict_form": "no",
+      "closure_rule": "no"
+    },
+    "second_attester": null
+  },
+  "indexes_searched": [
+    "Gap 1",
+    "Gap 99",
+    "FM-1"
+  ],
+  "tokens_with_no_rows": [
+    "Gap 99"
+  ],
+  "checked_ids": [
+    "C-001",
+    "C-002",
+    "C-003"
+  ],
+  "items": [
+    {
+      "label": "A1",
+      "outcome": "re-ruled pass",
+      "no_touch": false,
+      "overridden": false,
+      "checked_ids": [
+        "C-001",
+        "C-003"
+      ],
+      "verdicts": [
+        {
+          "corpus_id": "C-001",
+          "judge": "Example Judge Seat",
+          "clause": "fail if the amendment permits the named failure shape.",
+          "word": "PASS",
+          "reason": "The row was judged on its own procedure.",
+          "flagged": false,
+          "row_note": null,
+          "claim": null,
+          "excused": false,
+          "trace_excerpt": {
+            "word": "PASS",
+            "queue_item": null
+          }
+        },
+        {
+          "corpus_id": "C-003",
+          "judge": "Example Judge Seat",
+          "clause": "fail if the counts do not reconcile at the end.",
+          "word": "FAIL",
+          "reason": "The amendment permits the named failure shape.",
+          "flagged": false,
+          "row_note": null,
+          "claim": {
+            "queue_item": "DQ-201",
+            "ruling_date": "2026-11-01",
+            "confirming_judge": "Example Judge Seat"
+          },
+          "excused": true,
+          "trace_excerpt": {
+            "word": "RE-RULED",
+            "queue_item": "DQ-201"
+          }
+        }
+      ]
+    },
+    {
+      "label": "A2",
+      "outcome": "pass",
+      "no_touch": false,
+      "overridden": false,
+      "checked_ids": [
+        "C-002"
+      ],
+      "verdicts": [
+        {
+          "corpus_id": "C-002",
+          "judge": "Example Judge Seat",
+          "clause": "fail if the row is judged by a seat with a conflict.",
+          "word": "PASS",
+          "reason": "The row was judged on its own procedure.",
+          "flagged": false,
+          "row_note": null,
+          "claim": null,
+          "excused": false,
+          "trace_excerpt": {
+            "word": "PASS",
+            "queue_item": null
+          }
+        }
+      ]
+    }
+  ],
+  "re_ruling_candidates": [
+    {
+      "corpus_id": "C-003",
+      "queue_item": "DQ-201",
+      "status_as_read": "RULED, closed",
+      "heading": "### DQ-201: a ruled entry naming one row",
+      "first_line": 3,
+      "last_line": 9
+    }
+  ],
+  "re_ruling_matches": [
+    {
+      "item": "A1",
+      "corpus_id": "C-003",
+      "queue_item": "DQ-201",
+      "ruling_date": "2026-11-01",
+      "status_as_read": "RULED, closed",
+      "confirming_judge": "Example Judge Seat"
+    }
+  ],
+  "unverified_excuses": [],
+  "blocked_items": [],
+  "counts": {
+    "checks_run": 3,
+    "passed": 2,
+    "failed": 1,
+    "failed_excused": 1,
+    "failed_unexcused": 0,
+    "unjudgeable": 0,
+    "missing": 0
+  },
+  "missing": [],
+  "self_test": {
+    "probes": [
+      {
+        "name": "selection_probe",
+        "result": "pass"
+      },
+      {
+        "name": "pass_probe",
+        "result": "pass"
+      },
+      {
+        "name": "blocking_probe",
+        "result": "pass"
+      },
+      {
+        "name": "excused_fail_probe",
+        "result": "pass"
+      },
+      {
+        "name": "binding_probe",
+        "result": "pass"
+      }
+    ],
+    "counted_separately": true
+  },
+  "limits": [
+    "a judge whose reasoning is wrong while the forms are complete is not detectable by this program; the layered answer is the fresh Auditor oversight of part 4.6 and the reader designate duty of part 5.4",
+    "a declaration wrong from the start in a way no tripwire catches is not guarded by the readback page; the layered answer is the runner confirmation and the Auditor addition right",
+    "corpus dialects as read: Annex 1: Gap tokens only 1 rows, FM tokens only 1 rows, both kinds 1 rows; Annex 2: Gap tokens only 3 rows",
+    "clause family as read: fail if the amendment permits the named failure shape., 2 rows",
+    "clause family as read: fail if the row is judged by a seat with a conflict., 2 rows",
+    "clause family as read: fail if the counts do not reconcile at the end., 2 rows",
+    "declared tokens that selected no row: Gap 99",
+    "no entry in the queue as read carries the status standing",
+    "the verdicts binding carries no run identifier in version 1; a verdicts input from an earlier run over unchanged inputs verifies against a later run over the same inputs",
+    "a corpus content change that keeps the structure valid is visible only as a different fingerprint",
+    "index tokens written in forms outside the tripwire extraction grammar are not extracted; ranges and compressed lists are outside the grammar",
+    "judge fatigue across a long run is not detectable by this program; judging may proceed in sittings, and sittings change pacing and never the bar",
+    "trigger facts are attestations by the runner; a wrong attestation is not detectable by this program; the layered answer is the Auditor oversight, the dispute attestation, and the record printing the attested facts beside the attester name",
+    "sizing as measured: Gap 1 selects 159 rows, the Gap 1 to 4 union selects 218 rows, FM tokens together reach 34 rows, and a full run checks 224 rows per wording item; record size grows in proportion to rows checked times wording items; no output byte limit applies"
+  ],
+  "reader_designate_line": "Example Reader Seat. An amendment takes effect only after the Auditor, or a named reader who is neither author nor ruler, has read this record. This record names the reader designate; it does not record that the reading has happened.",
+  "auditor_oversight_line": "a fresh Auditor oversees this run after reading the corpus and the wording set first hand, under the procedure of part 4.6. The overseeing seat and the fact of that reading are attested outside this record in the filed trace; this record states the duty and does not record that the oversight or the reading has happened."
+}

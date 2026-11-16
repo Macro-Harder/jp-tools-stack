@@ -1,0 +1,14 @@
+declarer: Example Declarer Seat
+amendment-fingerprint: ad0e340d77b15d8b080f258e64dc149f173b5c28b582f4d2bec44e4008a5effe
+item: A1
+token: Gap 1 | basis: Basis prose for Gap 1 on A1.
+token: Gap 99 | basis: Basis prose for Gap 99 on A1.
+item: A2
+token: FM-1 | basis: Basis prose for FM-1 on A2.
+confirmation:
+confirmer: Example Confirmer Seat
+item: A1
+tokens: Gap 1, Gap 99
+item: A2
+tokens: FM-1
+end-confirmation:

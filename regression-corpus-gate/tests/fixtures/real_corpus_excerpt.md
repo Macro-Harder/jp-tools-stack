@@ -1,0 +1,34 @@
+# Regression Corpus: Failures First
+
+## Purpose
+
+Any proposed rule or amendment to the build flow is run against this corpus. An amendment that would have allowed a corpus incident fails the gate unless Captain JP explicitly re-rules that incident.
+
+## Entry count note
+
+This corpus contains 224 incident entries. That is an entry count, not a unique-event count. The four source passes overlap by design: the same event may appear in two annexes through two lenses. The corpus keeps all 224 entries. Where two entries describe the same event, they cross-reference each other in both rows rather than either being deleted.
+
+## How to run the gate
+
+Pass procedure for a proposed amendment: check the amendment against every corpus statement whose Gap/FM index it touches. For each touched row, apply that row's Pass procedure column. A single FAIL blocks the amendment. Passing requires that the amendment, as written, would not permit the failure shape in any touched row, or that Captain JP has explicitly re-ruled that specific incident through the decision queue. Silence in the amendment on a touched failure shape counts as a fail where the row's pass procedure says so.
+
+Gap index key: Gap 1 to Gap 10 are the ten ranked definitional gaps in research-1 Part C (1 member and team undefined in spawn-record terms; 2 no stage closure rule; 3 audit verdicts decoupled from audit form; 4 no work-state vocabulary; 5 brief and plan name-only; 6 tier self-claimable; 7 verified rests on the reporter; 8 live proof has no minimum or headline rule; 9 no halt protocol; 10 standing roles defined as duties with no cadence, artifact or attribution). FM-1 to FM-14 are the Muster failure modes in research-1 (FM-1 passes as members; FM-2 panel simulation; FM-3 grouped colour papers; FM-4 one agent holding several seats; FM-5 whole group in one spawn; FM-6 coordinator self-audit; FM-7 missing seats or teams; FM-8 misdescribed staffing; FM-9 uninvoked tier; FM-10 planned staffing counted as done; FM-11 exempt shapes counted toward a minimum; FM-12 one worker spread across several products; FM-13 coordinator counted as a team member; FM-14 records that support no verdict). Where a source entry states no FM, the row says so rather than assigning one.
+
+## Corpus register
+
+| Corpus ID | Source | Incident in one line | Test statement | Gap/FM index | Pass procedure |
+|---|---|---|---|---|---|
+| C-001 | 1-staffing.md #1 / Rewind | Research run as two spawns, not four teams | An implementation that permits research run as two spawns, not four teams fails | Gap 1; no FM stated in source row; source gap word: "team" (a single delegate counted as a team) | Inspect the amendment for any rule, definition or counting method that would allow research run as two spawns, not four teams; fail if allowed or if distinct-agent spawn evidence is not required. |
+| C-005 | 1-staffing.md #5 / Rewind | DQ-13 audit: one agent covers Purple and White | An implementation that permits one agent covers Purple and White fails | Gap 1; FM-4; source gap word: "member" (one member holding two seats) | Inspect the amendment for any rule, definition or counting method that would allow one agent covers Purple and White; fail if allowed or if distinct-agent spawn evidence is not required. |
+| C-019 | 1-staffing.md #19 / Skillforge | Note-taking: one agent briefed as the whole 4-member team; project file then claims four members Cross-ref: C-186 (same event, other lens). | An implementation that permits one agent briefed as the whole 4-member team; project file then claims four members fails | Gap 1; FM-5, FM-8; source gap word: "member"; "runs" (a stage described as run by a team when one spawn ran it) | Inspect the amendment for any rule, definition or counting method that would allow one agent briefed as the whole 4-member team; project file then claims four members; fail if allowed or if distinct-agent spawn evidence is not required. |
+| C-112 | 2-builds-a.md T-1 / Touchstone | Note-taking first run: one agent wearing all five roles Cross-ref: C-062 (same event, other lens). | An implementation that permits one agent wearing all five roles fails | Gap 1; no FM stated in source entry; source gap: The flow did not define whether a verification restaff after the fact cures a consolidated first run, or whether the stage must be re-derived by the full team. "Restaffed at verification" and "staffed" were used for two different things. | Inspect the amendment against the stage and role named in the source entry for any provision that would allow one agent wearing all five roles; fail if allowed, left unnamed, or closed on a report alone. |
+| C-147 | 3-builds-b.md #1 / Citeline | Citeline marked done after the estate-wide stop order Cross-ref: C-205 (same event, other lens). | An implementation that permits the project marked done after the estate-wide stop order fails | Gap 2, Gap 4, Gap 9; no FM stated in source entry; source gap: The flow has no definition of what a halt does to a completion that lands after the halt, and no rule for who may close a goal or move a board to done when... | Inspect the amendment against the stage and role named in the source entry for any provision that would allow the project marked done after the estate-wide stop order; fail if allowed, left unnamed, or closed on a report alone. |
+| C-187 | 4-crosscutting.md #1 / AgenC escrow / agenc-protocol fork (Macro-Harder/agenc-protocol) | Push helper reported a commit that did not exist on the remote | An implementation that permits push helper reported a commit that did not exist on the remote fails | Gap 2, Gap 3, Gap 7; no FM stated in source entry | Inspect the amendment for any provision that would allow push helper reported a commit that did not exist on the remote; fail if allowed, if the resulting state has no name in the amendment, or if verification rests on the reporter alone. |
+| C-194 | 4-crosscutting.md #8 / estate-wide (17 named project groups) | Staffing forensics: audit verdicts reported as passed were consolidated or simulated | An implementation that permits audit verdicts reported as passed were consolidated or simulated fails | Gap 1, Gap 2, Gap 3, Gap 4, Gap 5, Gap 6, Gap 7; FM-1, FM-14 | Inspect the amendment for any provision that would allow audit verdicts reported as passed were consolidated or simulated; fail if allowed, if the resulting state has no name in the amendment, or if verification rests on the reporter alone. |
+## Count check
+
+- Annex 1, staffing (scratch/1-staffing.md): 111 rows, C-001 to C-111.
+- Annex 2, builds-a (scratch/2-builds-a.md): 35 rows, C-112 to C-146.
+- Annex 3, builds-b (scratch/3-builds-b.md): 40 rows, C-147 to C-186.
+- Annex 4, crosscutting (scratch/4-crosscutting.md): 38 rows, C-187 to C-224.
+- Total: 111 + 35 + 40 + 38 = 224 rows.
