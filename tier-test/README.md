@@ -1,22 +1,14 @@
 # tier-test
 
-## Purpose
+## What it is
 
 tier-test applies the tier rule and size test of R-4 to one attested product fact record and reports the tier the test gives, with the line by line basis a tier record requires. It is a pure evaluator: one program, one job, named input, named output, no standing state. One record describes one product, and the tool never aggregates several products into one evaluation and never gives a build level result.
 
-## How to run
-
-Run the program with exactly two positional arguments:
-
-    tier-test INPUT OUTPUT
-
-INPUT is the path of the input record (JSON) and OUTPUT is the path the report is written to. The report is also printed to standard output, identical to the file. The tool has no options and no configuration; any argument, including one starting with a dash, is treated as a path when exactly two arguments are given.
-
-## Input record
+### Input record
 
 The input record is a JSON object with a closed field set. Any field outside the set is an input error. The fields, in order, are: build_ref (string, non-empty, required), product_ref (string, non-empty, required), handles_money ("yes", "no", or "unknown", required), security_surface ("yes", "no", or "unknown", required), public_surface ("yes", "no", or "unknown", required), private ("yes", "no", or "unknown", required), module_count (integer 0 or above, or "unknown", required), single_deployable_unit ("yes", "no", or "unknown", required when module_count is an integer at most 3 and optional otherwise), captain_invoked_tier (one of Low, Medium, High, Extra High, Plaid, optional), claimed_tier (one of Low, Medium, High, Extra High, Plaid, optional), and facts_note (string, non-empty, required). facts_note names who attested the facts and what they rest on, including the module inventory counted. The file must be UTF-8 text with no byte order mark, at most 2000000 bytes, with no duplicated key, and no null values. The tool reads its input once, composes its whole output before writing anything, never overwrites its input file, and writes nothing outside the named output.
 
-## Input contract
+### Input contract
 
 Suppliers attest the facts against these six predicate definitions, which are the contract in force.
 
@@ -32,23 +24,25 @@ Private: the product is intended and arranged for Captain JP and the people and 
 
 Deployable unit: a set of modules that is built, shipped or installed, and run as one thing, under one release and one running boundary. If modules ship, install, or run separately, they form more than one deployable unit.
 
-## Exit statuses
+### Exit statuses
 
 Three outcomes only: 0: tier given, 1: unsettled, 2: input error, delivery failure, or usage error. On exit 0 or 1 the report is written to the output file and printed identically to standard output. An unsettled report gives no tier and names every unsettled cause with its settlement instruction. On exit 2 nothing is printed on standard output and no report is delivered as a result: an input error names each failure of the input record or of the paths given, a delivery failure names the channel that could not be written, and a usage error states the expected argument form. The three exit 2 cases are distinctly named and never use each other's wording.
 
-## The report and the tier record
+### The report and the tier record
 
 The report is the size test basis component of a tier record, not a tier record. The remaining tier record duties sit outside this tool. The selected tier where it differs from the test result, an invocation as the basis form, and the Plaid ruling and its basis rest with Captain JP, at selection. The capacity clearance rests with the Project Manager, at the grill. Lowerings and raisings with their authority rest with Captain JP by recorded ruling and with the Manager, at the change, and the raise notification to Captain JP is made by the Manager when the raise is made. The staffing reviews a lowering or a raising triggers rest with the build's roles, at the change. Closed stage entries are not restated on a raise, a duty of the tier record's keeper at the change. Staffing shortfall or excess entries, and any statement of which protections and instruments are in force under the DQ-142 disagreement rule, rest with the tier record's keeper, from rosters and spawn records, when staffing is known. Any build level tier filing drawn from per product results is the caller's own determination, is never presented as a test result, and is filed with each product's report beside it.
 
-## Filing rule
+### Filing rule
 
 The report, its echoed input included, is filed alongside the tier record in the project's private design repo, and a changed fact set is a new run whose report is filed beside the earlier one. Filing the report files the facts with it, because the report echoes the full input record.
 
-## Measures overrule
+### Measures overrule
 
 The measures are compiled constants with no run time option: few is at most 6 modules, small is at most 3 modules, and tiny is at most 3 modules forming one deployable unit. A recorded overrule by Captain JP is applied as a constants change by the maintainer, expected the same day, and changes the version. In the interval between a recorded overrule and the tool catching up, callers hand-apply the ruling and cite the ruling, not the stale tool.
 
-## Worked example
+## Example
+
+### Worked example
 
 The shipped worked example pair, example-input.json and example-report.txt, reproduced in full. The record describes a product of five modules with no money, security, or public surface and not private, so the result is Medium: L1 and L2 do not fire, L3 is met, and L4 is not met because private is "no".
 
@@ -150,7 +144,7 @@ Restrictions stated: 2.
 Exit status: 0.
 ```
 
-## Worked attestation examples
+### Worked attestation examples
 
 The example pack in the examples folder works borderline calls through the Input contract definitions. One note per entry follows.
 
@@ -158,3 +152,17 @@ The example pack in the examples folder works borderline calls through the Input
 - secrets-only: The security surface definition names secrets handling as always counting as a security surface, so a product whose only security surface is its handling of the secrets it runs with attests security_surface as "yes". Line L1 fires on security_surface and the result is High.
 - two-inventories: The module definition is a counting convention: a distinct unit in the product's own design or module inventory, counted once each, with the inventory counted named in facts_note. Attested against the design's coarse module list, the same product counts 3 modules forming one deployable unit and the result is Low. Attested against the design's fine module list, it counts 8 modules and line L2 fires, so the result is High. The count follows the named inventory, not the product alone.
 - two-units: The deployable unit definition counts a set of modules that is built, shipped or installed, and run as one thing; modules that ship and run separately form more than one deployable unit. Three modules that ship and run as two deployable units attest single_deployable_unit as "no", so tiny fails on the unity condition: L3 is met, L4 is not met, and the result is Medium.
+
+## How to use it
+
+Run the program with exactly two positional arguments:
+
+    tier-test INPUT OUTPUT
+
+INPUT is the path of the input record (JSON) and OUTPUT is the path the report is written to. The report is also printed to standard output, identical to the file. The tool has no options and no configuration; any argument, including one starting with a dash, is treated as a path when exactly two arguments are given.
+
+## For agents
+
+Agent use differs in what surrounds the run. The agent attests the facts against the six predicate definitions in the Input contract, names who attested them and the module inventory counted in facts_note, runs the tool, and files the report alongside the tier record in the project's private design repo. Where the facts change, the agent runs the tool again and files the new report beside the earlier one. A build level tier filing drawn from per product results is the agent's own determination, never presented as a test result, and is filed with each product's report beside it.
+
+Example: an agent preparing a tier record for a five module product with no money, security, or public surface writes the input record shown in the worked example, runs `tier-test input.json report.txt`, and files report.txt beside the tier record. The result is Medium at exit status 0.
