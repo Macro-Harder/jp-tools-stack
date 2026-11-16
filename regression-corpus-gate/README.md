@@ -1,10 +1,34 @@
 # regression-corpus-gate
 
+## What it is
+
 The regression corpus gate judges proposed amendments to flow documents against the regression corpus before they take effect. A run selects the corpus rows an amendment touches, presents them for judging, verifies the verdicts and any claimed re-ruling, and writes a record of the outcome. The record informs a closure decision and makes none.
 
 The tool is one Python program, `regression_corpus_gate.py`, standard library only. It requires Python 3.12 or later.
 
-## Running the tool
+### This gate and the Plaid replay suite
+
+The distinction is plain: this gate judges proposed amendments against the corpus before they take effect, while the suite replays known failures against a built thing. The gate works on proposed wording and a declaration of the indexes it touches; the replay suite works on a built artefact. A gate pass is not a replay result, and a replay result is not a gate pass.
+
+### File syntax summaries
+
+The amendment file holds one wording item after another. Each item opens with a line of the form `item: LABEL`, followed by its wording text lines. A line that begins with the item marker at the first character always opens a new item.
+
+The declaration file holds a header (`declarer:` and `amendment-fingerprint:` lines), one block per wording item, and a confirmation block. A block holds token lines of the form `token: TOKEN | basis: BASIS PROSE`, or one line of the form `no-touch: BASIS PROSE` asserting the item touches no index. The confirmation block opens with `confirmation:`, names the confirmer, repeats each item with a `tokens:` line, and closes with `end-confirmation:`.
+
+The verdicts input holds a binding header (fingerprints, modes, triggers, one `checked:` line per checked corpus ID, the judge of record, and any panel judges), then one verdict block per checked pair. A block opens with `verdict: LABEL C-000` and holds `judge:`, `clause:`, `word:`, and `reason:` lines. A FAIL verdict that claims an excuse carries one `claim:` block holding `queue-item:`, `ruling-date:`, and `confirming-judge:` lines.
+
+The corpus and the queue keep their own existing formats. The corpus is the register of incident rows with its two count statements. The queue is searched by corpus ID token and entry status, never field parsed.
+
+### Input errors
+
+Every input error carries its own identifier and wording: every input error is printed with its distinct wording and writes no file. An input error prints the input error sentence and the specific wording line to standard error and exits with status 2. Usage errors and delivery failures also exit with status 2, each in its own form. The tool never overwrites an output path that already exists.
+
+## Example
+
+The examples folder ships a complete worked set: example_corpus.md, example_amendment.md (two items: A1 changes the staffing rule text, A2 changes the counting text), example_declaration.txt, example_verdicts.txt, and example_queue.md. The finalise run over these files produced the record in example_report.txt: a re-ruled pass at exit status 5, because every fail is excused by a confirmed re-ruling that names its incident. The machine readable results stand in example_results.json. The record names its seats (runner, judge of record, wording author, ruler, step coordinator, reader designate) and states the next step: the caller files the record into the trace the standing procedure names, and the record itself makes no closure decision.
+
+## How to use it
 
 ```
 python3 regression_corpus_gate.py --form FORM [arguments for that form]
@@ -18,7 +42,7 @@ FORM is one of `worksheet`, `remaining`, or `finalise`.
 
 Identity and role arguments: `--runner`, `--judge` (the judge of record, never read from any input file), `--author`, `--ruler`, `--coordinator`, `--panel-judge` (repeatable, once per panel judge), and `--reader-designate` at the finalise form. Attestation arguments: `--declared-mode` (`subset` or `full`), `--tier` (`Low`, `Medium`, `High`, `Extra High`, `Plaid`), `--context` (`stated`, `unstated`, `mixed`, `disputed`; omission means `unstated`), and the seven change kind flags `--change-index-system`, `--change-gate-rule`, `--change-corpus`, `--change-definition`, `--change-counting-method`, `--change-verdict-form`, `--change-closure-rule`, each `yes` or `no`. A second attester set, prefixed with `second-`, is required where the runner is the wording author or the declarer is the wording author.
 
-## Outcomes and exit statuses
+### Outcomes and exit statuses
 
 | Status | Outcome |
 |---|---|
@@ -48,20 +72,8 @@ The plain sentences:
 
 This tool exit status numbers differ from three-checks at 3, 4, and 6, naming the three pairs: status 3 is incomplete in this tool and UNVERIFIABLE in three-checks; status 4 is unverifiable in this tool and barred in three-checks; status 6 is barred in this tool, and three-checks has no status 6, its barred run being status 4.
 
-## This gate and the Plaid replay suite
+## For agents
 
-The distinction is plain: this gate judges proposed amendments against the corpus before they take effect, while the suite replays known failures against a built thing. The gate works on proposed wording and a declaration of the indexes it touches; the replay suite works on a built artefact. A gate pass is not a replay result, and a replay result is not a gate pass.
+Agent use differs because the run's roles are seats that agents fill: the runner, the judge of record, any panel judges, the wording author, the ruler, the step coordinator, and the reader designate are all named as run arguments. The judge of record is never read from any input file. A judge who is the author, the ruler, or the coordinator of the step bars the run, and no verdict may stand. Between the worksheet and finalise forms, the judging itself is agent work: the worksheet form issues the worksheet and the prefilled verdicts template, the judge fills in one verdict block per checked pair, and the finalise form verifies the verdicts binding before it applies the blocking arithmetic.
 
-## File syntax summaries
-
-The amendment file holds one wording item after another. Each item opens with a line of the form `item: LABEL`, followed by its wording text lines. A line that begins with the item marker at the first character always opens a new item.
-
-The declaration file holds a header (`declarer:` and `amendment-fingerprint:` lines), one block per wording item, and a confirmation block. A block holds token lines of the form `token: TOKEN | basis: BASIS PROSE`, or one line of the form `no-touch: BASIS PROSE` asserting the item touches no index. The confirmation block opens with `confirmation:`, names the confirmer, repeats each item with a `tokens:` line, and closes with `end-confirmation:`.
-
-The verdicts input holds a binding header (fingerprints, modes, triggers, one `checked:` line per checked corpus ID, the judge of record, and any panel judges), then one verdict block per checked pair. A block opens with `verdict: LABEL C-000` and holds `judge:`, `clause:`, `word:`, and `reason:` lines. A FAIL verdict that claims an excuse carries one `claim:` block holding `queue-item:`, `ruling-date:`, and `confirming-judge:` lines.
-
-The corpus and the queue keep their own existing formats. The corpus is the register of incident rows with its two count statements. The queue is searched by corpus ID token and entry status, never field parsed.
-
-## Input errors
-
-Every input error carries its own identifier and wording: every input error is printed with its distinct wording and writes no file. An input error prints the input error sentence and the specific wording line to standard error and exits with status 2. Usage errors and delivery failures also exit with status 2, each in its own form. The tool never overwrites an output path that already exists.
+Example: an agent seated as runner issues the worksheet form for an amendment and receives the worksheet and the verdicts template at exit status 10. The judge of record writes a verdict block for each checked pair in the template, and the runner then runs the finalise form. If every checked row passes, the run ends at exit status 0 and the amendment may go forward to filing and reading.
