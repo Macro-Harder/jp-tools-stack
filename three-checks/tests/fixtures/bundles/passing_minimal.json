@@ -1,0 +1,174 @@
+{
+  "layout": {
+    "stage_id": "stage-1",
+    "steps": [
+      {
+        "step_id": "S1",
+        "seat": "builder",
+        "predicate_type": "build"
+      },
+      {
+        "step_id": "S2",
+        "seat": "reviewer",
+        "predicate_type": "review"
+      }
+    ],
+    "required_artifacts": [
+      {
+        "artifact_id": "A1",
+        "path": "artifact1.txt",
+        "sha256": "eb339a5b18ae2472905e5efe9632fa2bcf9c2cf9cfa3940efb25808f1984e8c2",
+        "properties": []
+      }
+    ],
+    "record_sources": [
+      {
+        "record_kind": "roster",
+        "source": "runtime-spawn-records"
+      },
+      {
+        "record_kind": "push",
+        "source": "api-verification"
+      },
+      {
+        "record_kind": "links",
+        "source": "stage-record"
+      },
+      {
+        "record_kind": "claim",
+        "source": "stage-record"
+      },
+      {
+        "record_kind": "ledger",
+        "source": "stage-record"
+      }
+    ]
+  },
+  "roster": {
+    "entries": [
+      {
+        "seat": "builder",
+        "agent_id": "agent-1",
+        "recorded_at": "2026-01-01T00:00:00Z",
+        "origin": "layout"
+      },
+      {
+        "seat": "reviewer",
+        "agent_id": "agent-2",
+        "recorded_at": "2026-01-01T00:00:00Z",
+        "origin": "layout"
+      }
+    ],
+    "republications": []
+  },
+  "links": [
+    {
+      "step_id": "S1",
+      "predicate_type": "build",
+      "performer_spawn_id": "agent-1",
+      "builder": "builder-name",
+      "produced_at": "2026-01-02T00:00:00Z",
+      "ran_at": "2026-01-01T12:00:00Z",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "m1",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "subject_artifacts": [
+        {
+          "artifact_id": "A1",
+          "sha256": "eb339a5b18ae2472905e5efe9632fa2bcf9c2cf9cfa3940efb25808f1984e8c2"
+        }
+      ]
+    },
+    {
+      "step_id": "S2",
+      "predicate_type": "review",
+      "performer_spawn_id": "agent-2",
+      "builder": "builder-name",
+      "produced_at": "2026-01-02T00:00:00Z",
+      "ran_at": "2026-01-01T12:00:00Z",
+      "inputs": [
+        {
+          "name": "m1",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "outputs": [],
+      "subject_artifacts": []
+    }
+  ],
+  "spawn_records": {
+    "exporter": "runtime",
+    "exported_at": "2026-01-01T00:00:00Z",
+    "source_database": "spawn-db",
+    "scoping": {
+      "method": "identity_list",
+      "detail": "two agents"
+    },
+    "records": [
+      {
+        "agent_id": "agent-1",
+        "parent_agent_id": "root",
+        "depth": 0,
+        "kind": "spawn",
+        "agent_type": null,
+        "session_id": "sess-1",
+        "created_at": "2026-01-01T00:00:00Z"
+      },
+      {
+        "agent_id": "agent-2",
+        "parent_agent_id": "root",
+        "depth": 0,
+        "kind": "spawn",
+        "agent_type": null,
+        "session_id": "sess-2",
+        "created_at": "2026-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "identities": {
+    "coordinator": "coord-1",
+    "commissioner_stage": "comm-stage",
+    "commissioner_work": "comm-work"
+  },
+  "claim": {
+    "stage_id": "stage-1",
+    "steps_claimed": [
+      "S1",
+      "S2"
+    ],
+    "step_completions": [
+      {
+        "step_id": "S1",
+        "completed_at": "2026-01-03T00:00:00Z"
+      },
+      {
+        "step_id": "S2",
+        "completed_at": "2026-01-03T00:00:00Z"
+      }
+    ],
+    "gate_context": null,
+    "push_link": null,
+    "predecessor_inputs": null,
+    "ledger_claims": [
+      "E1"
+    ]
+  },
+  "push_record": {
+    "repo": "repo-1",
+    "branch": "main",
+    "head_sha": "h1",
+    "tree_sha": "t1",
+    "verified_by": "verifier-x",
+    "verified_at": "2026-01-01T00:00:00Z"
+  },
+  "ledger_entries": [
+    {
+      "entry_id": "E1",
+      "text": "ledger text"
+    }
+  ]
+}

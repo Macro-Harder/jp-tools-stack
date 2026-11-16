@@ -1,0 +1,25 @@
+tool=three-checks version=1.0.0
+stage=stage-1
+outcome=PASS
+consequence=none
+context=none
+authenticity: pass
+chain: pass
+completeness: pass
+  links: pass
+  artifacts: pass
+  ledger: pass
+bundle_sha256=ac5d642390f3991ac4df408a9eca441dd713f8b5b2426d1ca5375a55bf73148e
+verifier=verifier-1
+exporter=runtime exported_at=2026-01-01T00:00:00Z scoping=identity_list
+source_database=spawn-db
+sections present: layout, roster, links, spawn_records, identities, claim, push_record, ledger_entries
+sections absent: previous_stage
+push: repo=repo-1 verified_by=verifier-x verified_at=2026-01-01T00:00:00Z origin=api-verification at assembly
+strength: the checks count at the closure record L2 grade and no higher, and only where the origin tests passed; the seat association rests on the roster record.
+boundary: not applicable
+part 1: advance layout seats
+step S2 seat=reviewer recorded=2026-01-01T00:00:00Z authenticity=pass matching=pass
+part 2: seats added under R-50
+step S1 seat=builder recorded=2026-01-01T00:00:00Z republished=2026-01-01T06:00:00Z authenticity=pass matching=pass
+join S1 -> S2: pass

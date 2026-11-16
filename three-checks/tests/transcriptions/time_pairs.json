@@ -1,0 +1,86 @@
+[
+  {
+    "a": "2026-01-01T00:00:00Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "equal",
+    "a_parses": true,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00Z",
+    "b": "2026-01-01T00:00:01Z",
+    "relation": "before",
+    "a_parses": true,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:01Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "after",
+    "a_parses": true,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00.500Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "after",
+    "a_parses": true,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00+00:00",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01 00:00:00Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-W01-1T00:00:00Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00,500Z",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  },
+  {
+    "a": "2026-01-01T00:00:00",
+    "b": "2026-01-01T00:00:00Z",
+    "relation": "rejected form",
+    "a_parses": false,
+    "b_parses": true
+  }
+]

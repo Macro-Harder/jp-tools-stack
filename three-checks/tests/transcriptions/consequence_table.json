@@ -1,0 +1,48 @@
+{
+  "table": {
+    "ABSENT-SECTION": "UNVERIFIABLE",
+    "AUTH-NO-SPAWN": "PARTIAL",
+    "AUTH-NO-ROSTER": "PARTIAL",
+    "AUTH-STEP-TIME": "PARTIAL",
+    "AUTH-LATE-RECORD": "PARTIAL",
+    "AUTH-NO-REPUB": "PARTIAL",
+    "AUTH-NO-PUSH": "PARTIAL",
+    "AUTH-ORIGIN": "PARTIAL",
+    "LINK-NO-STEP": "PARTIAL",
+    "CHAIN-JOIN": "PARTIAL",
+    "CHAIN-BOUNDARY": "PARTIAL",
+    "COMP-NO-LINK": "PARTIAL",
+    "COMP-RECONSTRUCTED": "PARTIAL",
+    "COMP-ARTIFACT": "PARTIAL",
+    "COMP-PROPERTY": "PARTIAL",
+    "COMP-UNSUPPORTED-PROPERTY": "PARTIAL",
+    "COMP-LEDGER": "PARTIAL",
+    "LINK-PREDICATE": "PARTIAL",
+    "ANOM-MULTI-LINK": "none"
+  },
+  "conditional_notes": {
+    "AUTH-NO-SPAWN": "UNVERIFIABLE where the spawn_records records list is empty, otherwise PARTIAL",
+    "AUTH-NO-ROSTER": "UNVERIFIABLE where the roster entries list is empty, otherwise PARTIAL"
+  },
+  "codes": [
+    "ABSENT-SECTION",
+    "AUTH-NO-SPAWN",
+    "AUTH-NO-ROSTER",
+    "AUTH-STEP-TIME",
+    "AUTH-LATE-RECORD",
+    "AUTH-NO-REPUB",
+    "AUTH-NO-PUSH",
+    "AUTH-ORIGIN",
+    "LINK-NO-STEP",
+    "CHAIN-JOIN",
+    "CHAIN-BOUNDARY",
+    "COMP-NO-LINK",
+    "COMP-RECONSTRUCTED",
+    "COMP-ARTIFACT",
+    "COMP-PROPERTY",
+    "COMP-UNSUPPORTED-PROPERTY",
+    "COMP-LEDGER",
+    "LINK-PREDICATE",
+    "ANOM-MULTI-LINK"
+  ]
+}

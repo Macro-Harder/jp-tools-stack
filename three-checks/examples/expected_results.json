@@ -1,0 +1,45 @@
+{
+  "tool": "three-checks",
+  "version": "1.0.0",
+  "stage_id": "stage-1",
+  "bundle_sha256": "ac5d642390f3991ac4df408a9eca441dd713f8b5b2426d1ca5375a55bf73148e",
+  "outcome": "PASS",
+  "consequence": null,
+  "gate_context": null,
+  "checks": {
+    "authenticity": "pass",
+    "chain": "pass",
+    "completeness": "pass"
+  },
+  "subresults": {
+    "links": "pass",
+    "artifacts": "pass",
+    "ledger": "pass"
+  },
+  "provenance": {
+    "exporter": "runtime",
+    "exported_at": "2026-01-01T00:00:00Z",
+    "scoping_method": "identity_list",
+    "source_database": "spawn-db",
+    "verifier": "verifier-1",
+    "sections_present": [
+      "layout",
+      "roster",
+      "links",
+      "spawn_records",
+      "identities",
+      "claim",
+      "push_record",
+      "ledger_entries"
+    ],
+    "sections_absent": [
+      "previous_stage"
+    ],
+    "push": {
+      "repo": "repo-1",
+      "verified_by": "verifier-x",
+      "verified_at": "2026-01-01T00:00:00Z"
+    }
+  },
+  "discrepancies": []
+}

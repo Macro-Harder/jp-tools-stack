@@ -1,0 +1,35 @@
+{
+  "check": "pass",
+  "subresults": {
+    "links": "pass",
+    "artifacts": "pass",
+    "ledger": "pass"
+  },
+  "artifacts": [
+    {
+      "artifact_id": "A1",
+      "coverage": "pass",
+      "standing": [
+        {
+          "test": "readable",
+          "outcome": "pass"
+        },
+        {
+          "test": "size",
+          "outcome": "pass"
+        },
+        {
+          "test": "digest",
+          "outcome": "pass"
+        }
+      ],
+      "properties": []
+    }
+  ],
+  "ledger": [
+    {
+      "entry_id": "E1",
+      "outcome": "pass"
+    }
+  ]
+}

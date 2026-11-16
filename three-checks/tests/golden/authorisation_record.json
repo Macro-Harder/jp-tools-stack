@@ -1,0 +1,21 @@
+{
+  "link_index": 0,
+  "step_id": "S1",
+  "predicate_type": "build",
+  "performer_spawn_id": "agent-1",
+  "builder": "builder-name",
+  "ran_at": {
+    "raw": "2026-01-01T12:00:00Z",
+    "parses": true
+  },
+  "binding_outcome": "bound",
+  "time_anchor_outcome": "pass",
+  "authorisation_outcome": "authorised",
+  "origin_of_authorising_entry": "layout",
+  "seat_stands_in_advance_layout": true,
+  "republication_outcome": "not applicable",
+  "all_unparseable_republication_marker": false,
+  "first_failing_subtest": "none",
+  "authenticity_outcome": "pass",
+  "recorded_at_for_report": "2026-01-01T00:00:00Z"
+}

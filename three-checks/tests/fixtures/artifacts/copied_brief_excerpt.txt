@@ -1,0 +1,40 @@
+# Design brief: three-checks
+
+## 1. Job
+
+three-checks runs the three checks of R-80, authenticity, chain, and completeness, in that order, over the records of one stage closure, and reports the result in two roster parts together with every missing or broken link, so a verifier other than the performer can rely on a recomputed result instead of on the filings taken at face value. It checks records. It does not perform the steps it checks, does not close the stage, does not record the stage state, and does not judge the quality of any artifact.
+
+## 2. Form and invocation
+
+One Python program, standard library only, at ~/workspace/tools/three-checks/three_checks.py. One run checks one stage closure. A whole build is checked by separate runs, one per stage, each producing its own report and results, and, on a full pass, its closure record. The recording of the stage state itself is a duty held elsewhere; the tool computes and reports, and on a full pass writes the closure record of section 8. The Bundle Validator second mode is deferred to the next version. The Verifier Workbench framing is not used: the tool makes the determinations itself. Invocation:
+
+three-checks BUNDLE REPORT RESULTS CLOSURE --verifier IDENTITY
+
+BUNDLE is the stage record bundle (section 3). REPORT is the text report path, RESULTS the JSON results path, CLOSURE the attested closure record path; the closure file is written only on a full pass, and a failing or barred run creates no closure file and leaves any existing file at that path untouched. IDENTITY is the verifier identity, supplied as a run argument and never read from the bundle (grill G17). Output files are written only to the named paths and never overwrite an input file. Path equality is tested on resolved absolute paths: naming an output path that resolves to the bundle path, to any artifact path, or to another output path is a usage error. Wrong argument shape is a usage error, named as such, exit status 2.
+
+## 3. Input: the stage record bundle
+
+One JSON object in one file, read once as bytes under a 2,000,000 byte limit, refusal naming the limit and the measured value. Closed field sets at every level: a field outside its set is an input error naming the field by its full path. Field types are stated per field; a JSON boolean is never an integer; a float is the wrong type for every integer and digest field. A string holding an unpaired surrogate is invalid. Times are strings in ISO 8601 UTC form with a Z suffix, compared by parsed instant. A time value that is not a string is a type error and an input error. A string that does not parse as an ISO 8601 UTC instant is not an input error: it is a value the check that reads it cannot use, and that check fails on the record carrying it, under the mapping in section 7 (grill G28). Digest fields are strings. A digest value that is not a string is a type error and an input error. The form the checks compare against is SHA-256 as 64 lowercase hex characters; a string digest outside that form simply fails the comparison it sits in, under the code of that comparison as mapped in section 7, and is never an input error. The bundle digest used in reports is the SHA-256 of the bundle bytes as read.
+
+Top level sections, closed set: layout, roster, links, spawn_records, identities, claim (required); push_record, previous_stage, ledger_entries (conditional, section 4).
+
+### layout
+
+- stage_id: string, required.
+- steps: list, required, at least one entry. Each entry, closed set: step_id (string), seat (string), predicate_type (string). Array order is the step order. Two steps with the same step_id are an input error naming layout.steps.
+- required_artifacts: list, may be empty. Each entry, closed set: artifact_id (string), path (string, the artifact file path as supplied to the run; a relative path resolves against the directory containing the bundle file), sha256 (digest), properties (list, may be empty). Two artifacts with the same artifact_id, or two artifacts naming the same resolved path, are an input error naming layout.required_artifacts. Each property, closed set: kind (string), line (string), count (integer at least 0), sha256 (digest). The kind field is a plain string at validation: it is never an allowed set input error. The evaluated kinds are exists, sha256_equals, contains_line, first_line_equals, line_count_at_least, line_count_at_most, and byte_size_at_most (grill G9). Per kind field rules: exists carries no other field; sha256_equals requires sha256 and carries no line or count; contains_line and first_line_equals require line and carry no count or sha256; line_count_at_least and line_count_at_most require count and carry no line or sha256; byte_size_at_most requires count and carries no line or sha256. A missing required field for an evaluated kind, or a field present that its kind does not carry, is an input error naming the field path. A property whose kind is none of the seven is an unsupported property: its line, count, and sha256 fields, where present, are type checked and otherwise ignored, and the property fails at check time under section 7, never at this gate.
+- record_sources: list, may be empty. Each entry, closed set: record_kind (string, one of roster, push, links, claim, ledger), source (string, from the closed set for its kind: for roster, runtime-spawn-records or self-reported-file; for push, api-verification or self-reported-file; for links, claim, and ledger, stage-record or self-reported-file; a value outside the set for its kind is an input error). Two entries may name the same kind; the origin rules of section 7 state how duplicates resolve. The origin test of section 7 reads this list.
+
+### roster
+
+- entries: list, required. Each entry, closed set: seat (string), agent_id (string), recorded_at (time), origin (string, one of layout, addition). An entry with origin layout asserts the seat stands in the advance published layout; an entry with origin addition is a seat added under R-50.
+- republications: list, may be empty. Each entry, closed set: seat (string), republished_at (time). Where a seat has more than one republication entry, the earliest republished_at governs every test and the report.
+
+### links
+
+A list, required. Each entry, closed set: step_id (string), predicate_type (string), performer_spawn_id (string), builder (string), produced_at (time, the one optional field in this set: it may be absent, and its absence is a check case under grill G15, never a field error; where it is present and not a string, it is a type error), ran_at (time), inputs (material list), outputs (material list), subject_artifacts (list, may be empty; each entry, closed set: artifact_id (string), sha256 (digest)). A material list is a list of entries, closed set: name (string), sha256 (digest).
+
+### spawn_records
+
+- exporter: string, required. exported_at: time, required. source_database: string, required.
+- scoping: object, closed set: method (string, one of identity_list, parent_subtree, time_window), detail (string).

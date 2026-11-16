@@ -1,0 +1,78 @@
+{
+  "ABSENT-SECTION": {
+    "part": "stage",
+    "subject": "the section name"
+  },
+  "AUTH-NO-SPAWN": {
+    "part": "seat part of the link step, or stage for a duplicated export identity",
+    "subject": "per link the link step_id, and at stage level the duplicated or unbound record agent_id"
+  },
+  "AUTH-NO-ROSTER": {
+    "part": "seat part of the link step",
+    "subject": "the link step_id"
+  },
+  "AUTH-STEP-TIME": {
+    "part": "seat part of the link step, or stage for an unbound record",
+    "subject": "per link the link step_id, and at stage level the unbound record agent_id"
+  },
+  "AUTH-LATE-RECORD": {
+    "part": "seat part of the link step",
+    "subject": "the link step_id"
+  },
+  "AUTH-NO-REPUB": {
+    "part": "seat part of the link step",
+    "subject": "the link step_id"
+  },
+  "AUTH-NO-PUSH": {
+    "part": "stage",
+    "subject": "the word push"
+  },
+  "AUTH-ORIGIN": {
+    "part": "stage",
+    "subject": "the record kind"
+  },
+  "LINK-NO-STEP": {
+    "part": "stage",
+    "subject": "the link step_id as supplied"
+  },
+  "CHAIN-JOIN": {
+    "part": "earlier step part",
+    "subject": "earlier step_id, arrow, later step_id"
+  },
+  "CHAIN-BOUNDARY": {
+    "part": "stage",
+    "subject": "the word boundary"
+  },
+  "COMP-NO-LINK": {
+    "part": "seat part of the step, or stage for claim divergence forms",
+    "subject": "the step_id"
+  },
+  "COMP-RECONSTRUCTED": {
+    "part": "seat part of the step",
+    "subject": "the link step_id"
+  },
+  "COMP-ARTIFACT": {
+    "part": "stage",
+    "subject": "the artifact_id"
+  },
+  "COMP-PROPERTY": {
+    "part": "stage",
+    "subject": "the artifact_id"
+  },
+  "COMP-UNSUPPORTED-PROPERTY": {
+    "part": "stage",
+    "subject": "the artifact_id"
+  },
+  "COMP-LEDGER": {
+    "part": "stage",
+    "subject": "the entry_id"
+  },
+  "LINK-PREDICATE": {
+    "part": "seat part of the step",
+    "subject": "the link step_id"
+  },
+  "ANOM-MULTI-LINK": {
+    "part": "seat part of the step",
+    "subject": "the step_id"
+  }
+}

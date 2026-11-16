@@ -1,0 +1,108 @@
+{
+  "layout": {
+    "triage": {
+      "authenticity": "cannot run",
+      "chain": "cannot run",
+      "completeness": "cannot run"
+    },
+    "subresults": {
+      "links": "fail",
+      "artifacts": "fail",
+      "ledger": "fail"
+    },
+    "header_stage": "absent",
+    "provenance_fallback": null,
+    "outcome_cap": false,
+    "exit_status_on_otherwise_pass": 3
+  },
+  "roster": {
+    "triage": {
+      "authenticity": "cannot run",
+      "chain": "fail",
+      "completeness": "fail"
+    },
+    "subresults": {
+      "links": "fail",
+      "artifacts": "computed normally",
+      "ledger": "computed normally"
+    },
+    "header_stage": null,
+    "provenance_fallback": null,
+    "outcome_cap": false,
+    "exit_status_on_otherwise_pass": 3
+  },
+  "links": {
+    "triage": {
+      "authenticity": "cannot run",
+      "chain": "fail",
+      "completeness": "fail"
+    },
+    "subresults": {
+      "links": "fail",
+      "artifacts": "computed normally with one COMP-ARTIFACT coverage entry per required artifact",
+      "ledger": "computed normally"
+    },
+    "header_stage": null,
+    "provenance_fallback": null,
+    "outcome_cap": false,
+    "exit_status_on_otherwise_pass": 3
+  },
+  "spawn_records": {
+    "triage": {
+      "authenticity": "cannot run",
+      "chain": "fail",
+      "completeness": "fail"
+    },
+    "subresults": {
+      "links": "fail",
+      "artifacts": "computed normally",
+      "ledger": "computed normally"
+    },
+    "header_stage": null,
+    "provenance_fallback": {
+      "exporter": "absent",
+      "exported_at": "absent",
+      "scoping": "absent",
+      "source_database": "absent"
+    },
+    "outcome_cap": false,
+    "exit_status_on_otherwise_pass": 3
+  },
+  "identities": {
+    "triage": {
+      "authenticity": "run",
+      "chain": "run",
+      "completeness": "run"
+    },
+    "subresults": {
+      "links": "computed normally",
+      "artifacts": "computed normally",
+      "ledger": "computed normally"
+    },
+    "header_stage": null,
+    "provenance_fallback": null,
+    "outcome_cap": true,
+    "forced_outcome": "FAIL",
+    "forced_consequence": "UNVERIFIABLE",
+    "exit_status_on_otherwise_pass": 3
+  },
+  "claim": {
+    "triage": {
+      "authenticity": "run",
+      "chain": "run",
+      "completeness": "cannot run"
+    },
+    "subresults": {
+      "links": "fail",
+      "artifacts": "fail",
+      "ledger": "fail"
+    },
+    "header_stage": null,
+    "provenance_fallback": {
+      "boundary": "not applicable",
+      "context": "none"
+    },
+    "outcome_cap": false,
+    "exit_status_on_otherwise_pass": 3
+  }
+}

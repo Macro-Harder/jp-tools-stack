@@ -1,0 +1,17 @@
+{
+  "steps": [
+    {
+      "step_id": "S1",
+      "per_step_authenticity": "pass",
+      "per_step_matching": "pass",
+      "multi_link": false,
+      "matching_link_count": 1,
+      "predicate_mismatch_count": 0
+    }
+  ],
+  "stage_level": {
+    "layout_steps_not_claimed": [],
+    "claimed_steps_naming_no_layout_step": [],
+    "orphan_links": []
+  }
+}
