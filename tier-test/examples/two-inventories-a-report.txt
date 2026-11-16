@@ -1,0 +1,83 @@
+tier-test 1.0.0
+Tier test report
+This report applies the tier rule and size test of R-4.
+
+Result
+Result: Low.
+Basis: requirement line L4 was met.
+
+Outcome table
+L1: A money, security, or public surface gives High at minimum. Outcome: not fired.
+L2: More than a few modules gives High at minimum. Outcome: not fired.
+L3: Medium requires no money surface, no security surface, and a few modules only. Outcome: met.
+L4: Low requires a private product with no money surface, no security surface, no public surface, and a tiny module count. Outcome: met.
+L5: Extra High is selected only by Captain JP. Outcome: stated.
+L6: Plaid is above the size test entirely. Outcome: stated.
+
+Line by line basis
+
+L1: A money, security, or public surface gives High at minimum.
+Facts used: handles_money = "no"; security_surface = "no"; public_surface = "no".
+Outcome: not fired.
+Effect: this line imposes no minimum.
+
+L2: More than a few modules gives High at minimum.
+Facts used: module_count = 3.
+Outcome: not fired.
+Effect: this line imposes no minimum.
+
+L3: Medium requires no money surface, no security surface, and a few modules only.
+Facts used: handles_money = "no"; security_surface = "no"; module_count = 3.
+Outcome: met.
+Effect: the product is eligible for Medium under this line.
+Note: L4 is also met, and the assignment rule takes the lowest qualifying tier first, so Low stands over Medium [build ruling].
+
+L4: Low requires a private product with no money surface, no security surface, no public surface, and a tiny module count.
+Facts used: private = "yes"; handles_money = "no"; security_surface = "no"; public_surface = "no"; module_count = 3; single_deployable_unit = "yes".
+Outcome: met.
+Effect: the product is eligible for Low under this line.
+
+L5: Extra High is selected only by Captain JP.
+Facts used: none.
+Outcome: stated.
+Effect: Extra High is never a result of this test.
+
+L6: Plaid is above the size test entirely.
+Facts used: none.
+Outcome: stated.
+Effect: Plaid is never a result of this test.
+
+Facts as supplied
+Input fingerprint (SHA-256 of the input file bytes): 77953a14dadb878073af9393ba74a4ee23150cf76939ab6d6701e55d5c868e5d.
+The digest identifies the input file exactly; the same facts written with different spacing or key order give a different digest.
+build_ref = "example-pack"
+product_ref = "two-inventories"
+handles_money = "no"
+security_surface = "no"
+public_surface = "no"
+private = "yes"
+module_count = 3
+single_deployable_unit = "yes"
+captain_invoked_tier = not supplied
+claimed_tier = not supplied
+Facts as supplied; the tool evaluates the record, it does not verify the facts.
+facts_note
+Example facts attested by the tier-test maintainers for illustration. The module inventory counted is the design's coarse module list, which names three modules; the three modules form one deployable unit.
+
+Measures applied
+Few is at most 6 modules. Small is at most 3 modules. Tiny is at most 3 modules forming one deployable unit. These measures are cited to DQ-054.
+The single handles_money field serves both source phrases: "handles money" in L1 and "money surface" in L3 and L4.
+The input contract in force is the six predicate definitions printed in the README.
+Tool version: 1.0.0.
+
+Standing notes
+Extra High and Plaid are selected only by Captain JP, and the test never gives either.
+This report is the size test basis component of a tier record, not a tier record.
+
+Counts
+Lines fired or met: 2.
+Lines not fired or not met: 2.
+Lines unsettled: 0.
+Restrictions stated: 2.
+
+Exit status: 0.

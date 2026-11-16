@@ -1,0 +1,10 @@
+{
+  "build_ref": "example-pack",
+  "product_ref": "two-inventories",
+  "handles_money": "no",
+  "security_surface": "no",
+  "public_surface": "no",
+  "private": "yes",
+  "module_count": 8,
+  "facts_note": "Example facts attested by the tier-test maintainers for illustration. The module inventory counted is the design's fine module list, which names eight modules for the same product."
+}

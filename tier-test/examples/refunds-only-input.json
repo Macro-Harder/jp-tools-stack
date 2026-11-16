@@ -1,0 +1,10 @@
+{
+  "build_ref": "example-pack",
+  "product_ref": "refunds-only",
+  "handles_money": "yes",
+  "security_surface": "no",
+  "public_surface": "no",
+  "private": "yes",
+  "module_count": 4,
+  "facts_note": "Example facts attested by the tier-test maintainers for illustration. The product only refunds payments; it takes no payments and holds no balances. The module inventory counted is the product's design module list of four modules."
+}

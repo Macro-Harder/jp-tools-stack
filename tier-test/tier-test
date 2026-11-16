@@ -1,0 +1,843 @@
+#!/usr/bin/env python3
+import hashlib
+import json
+import os
+import sys
+
+VERSION = "1.0.0"
+FEW_LIMIT = 6
+SMALL_LIMIT = 3
+INPUT_BYTE_LIMIT = 2000000
+
+sys.set_int_max_str_digits(INPUT_BYTE_LIMIT)
+
+FIELD_ORDER = [
+    "build_ref",
+    "product_ref",
+    "handles_money",
+    "security_surface",
+    "public_surface",
+    "private",
+    "module_count",
+    "single_deployable_unit",
+    "captain_invoked_tier",
+    "claimed_tier",
+    "facts_note",
+]
+FIELD_SET = frozenset(FIELD_ORDER)
+TIER_ORDER = ["Low", "Medium", "High", "Extra High", "Plaid"]
+YES_NO_UNKNOWN = ("yes", "no", "unknown")
+
+STATEMENTS = {
+    "L1": "A money, security, or public surface gives High at minimum.",
+    "L2": "More than a few modules gives High at minimum.",
+    "L3": "Medium requires no money surface, no security surface, and a few modules only.",
+    "L4": "Low requires a private product with no money surface, no security surface, no public surface, and a tiny module count.",
+    "L5": "Extra High is selected only by Captain JP.",
+    "L6": "Plaid is above the size test entirely.",
+}
+LINE_IDS = ["L1", "L2", "L3", "L4", "L5", "L6"]
+
+EFFECTS = {
+    ("L1", "fired"): "Effect: the minimum tier is High.",
+    ("L1", "not fired"): "Effect: this line imposes no minimum.",
+    ("L1", "unsettled"): "Effect: the minimum this line imposes cannot be determined.",
+    ("L2", "fired"): "Effect: the minimum tier is High.",
+    ("L2", "not fired"): "Effect: this line imposes no minimum.",
+    ("L2", "unsettled"): "Effect: the minimum this line imposes cannot be determined.",
+    ("L3", "met"): "Effect: the product is eligible for Medium under this line.",
+    ("L3", "not met"): "Effect: the product is not eligible for Medium under this line.",
+    ("L3", "unsettled"): "Effect: eligibility for Medium under this line cannot be determined.",
+    ("L4", "met"): "Effect: the product is eligible for Low under this line.",
+    ("L4", "not met"): "Effect: the product is not eligible for Low under this line.",
+    ("L4", "unsettled"): "Effect: eligibility for Low under this line cannot be determined.",
+    ("L5", "stated"): "Effect: Extra High is never a result of this test.",
+    ("L6", "stated"): "Effect: Plaid is never a result of this test.",
+}
+
+USAGE_LINE = "usage error: expected exactly two arguments: tier-test INPUT OUTPUT."
+G3_PARAGRAPH = (
+    "No tier is given. This report is not a tier basis. Under R-4, a tier "
+    "and its basis must be recorded before any stage staffs."
+)
+DEFAULT_RESULT_LINE = (
+    "Result: High, by the standing default [build ruling]. No floor line "
+    "fired and no requirement line was met, so the standing default form "
+    "of the flow applies."
+)
+NOT_DECIDING_SENTENCE = " This line does not decide the result."
+FLOOR_OVERRIDE_NOTE = (
+    "Note: a floor line fired, so the floor result stands over this "
+    "line's eligibility [build ruling]."
+)
+LOW_OVER_MEDIUM_NOTE = (
+    "Note: L4 is also met, and the assignment rule takes the lowest "
+    "qualifying tier first, so Low stands over Medium [build ruling]."
+)
+INVOKED_NOTE = (
+    "Whether the size test floor binds a tier selected by Captain JP is "
+    "not settled in R-4 and is not ruled here."
+)
+CLAIMED_NOTE = "A build must not self-select a lower tier than the size test gives."
+
+
+class GateFailure(Exception):
+    def __init__(self, error_line):
+        super().__init__(error_line)
+        self.error_line = error_line
+
+
+def parse_arguments(args):
+    if len(args) != 2:
+        return None
+    return (args[0], args[1])
+
+
+class NonIntegerNumber(float):
+    pass
+
+
+def _has_unpaired_surrogate(text):
+    index = 0
+    length = len(text)
+    while index < length:
+        code = ord(text[index])
+        if 0xD800 <= code <= 0xDBFF:
+            if index + 1 >= length:
+                return True
+            following = ord(text[index + 1])
+            if not (0xDC00 <= following <= 0xDFFF):
+                return True
+            index += 2
+            continue
+        if 0xDC00 <= code <= 0xDFFF:
+            return True
+        index += 1
+    return False
+
+
+def _value_has_surrogate(value):
+    stack = [value]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, str):
+            if _has_unpaired_surrogate(item):
+                return True
+        elif isinstance(item, dict):
+            for key, sub in item.items():
+                stack.append(key)
+                stack.append(sub)
+        elif isinstance(item, (list, tuple)):
+            stack.extend(item)
+    return False
+
+
+def _value_has_surrogate_hook(value):
+    stack = [value]
+    while stack:
+        item = stack.pop()
+        if isinstance(item, str):
+            if _has_unpaired_surrogate(item):
+                return True
+        elif isinstance(item, (list, tuple)):
+            stack.extend(item)
+    return False
+
+
+class _InvalidJson(Exception):
+    pass
+
+
+def _reject_constant(name):
+    raise _InvalidJson(name)
+
+
+def parse_json(text):
+    recorded = []
+    surrogate_found = []
+
+    def pairs_hook(pairs):
+        for key, value in pairs:
+            if _has_unpaired_surrogate(key) or _value_has_surrogate_hook(value):
+                surrogate_found.append(True)
+        recorded.append(list(pairs))
+        return dict(pairs)
+
+    try:
+        value = json.loads(
+            text,
+            object_pairs_hook=pairs_hook,
+            parse_constant=_reject_constant,
+            parse_float=NonIntegerNumber,
+        )
+    except _InvalidJson:
+        return (False, None, None, None)
+    except (ValueError, RecursionError, MemoryError):
+        return (False, None, None, None)
+    try:
+        if surrogate_found or _value_has_surrogate(value):
+            return (False, None, None, None)
+    except RecursionError:
+        return (False, None, None, None)
+    if not isinstance(value, dict):
+        return (True, value, None, None)
+    top_pairs = recorded[-1] if recorded else []
+    mapping = {}
+    duplicates = []
+    seen = set()
+    dup_seen = set()
+    for key, item_value in top_pairs:
+        if key in seen:
+            if key not in dup_seen:
+                dup_seen.add(key)
+                duplicates.append(key)
+        else:
+            seen.add(key)
+            mapping[key] = item_value
+    return (True, value, mapping, duplicates)
+
+
+def _render_field_name(name):
+    rendered = json.dumps(name, ensure_ascii=False)
+    return rendered[1:-1]
+
+
+def _field_error(name, suffix):
+    return "input error: {0}: {1}".format(_render_field_name(name), suffix)
+
+
+def validate_fields(mapping, duplicates):
+    errors = []
+    dup_set = set(duplicates)
+    for name in duplicates:
+        errors.append(_field_error(name, "the field appears more than once."))
+    required = {
+        "build_ref", "product_ref", "handles_money", "security_surface",
+        "public_surface", "private", "module_count", "facts_note",
+    }
+    mc_value = mapping.get("module_count")
+    mc_is_count = (
+        isinstance(mc_value, int) and not isinstance(mc_value, bool)
+        and mc_value >= 0)
+    for field in FIELD_ORDER:
+        if field in dup_set:
+            continue
+        if field not in mapping:
+            if field in required:
+                errors.append(_field_error(
+                    field, "the field is required and is missing."))
+            elif field == "single_deployable_unit":
+                if mc_is_count and mc_value <= SMALL_LIMIT:
+                    errors.append(_field_error(
+                        field, "the field is required and is missing."))
+            continue
+        value = mapping[field]
+        if field in ("build_ref", "product_ref", "facts_note"):
+            if not isinstance(value, str):
+                errors.append(_field_error(
+                    field, "the value has the wrong type."))
+            elif value.strip() == "":
+                errors.append(_field_error(field, "the value is empty."))
+        elif field in ("handles_money", "security_surface", "public_surface",
+                       "private", "single_deployable_unit"):
+            if not isinstance(value, str):
+                errors.append(_field_error(
+                    field, "the value has the wrong type."))
+            elif value not in YES_NO_UNKNOWN:
+                errors.append(_field_error(
+                    field,
+                    'the value is not one of "yes", "no", "unknown".'))
+        elif field == "module_count":
+            if isinstance(value, bool):
+                errors.append(_field_error(
+                    field, "the value has the wrong type."))
+            elif isinstance(value, str):
+                if value != "unknown":
+                    errors.append(_field_error(
+                        field, "the value has the wrong type."))
+            elif isinstance(value, int):
+                if value < 0:
+                    errors.append(_field_error(
+                        field, "the value is below 0."))
+            elif isinstance(value, NonIntegerNumber):
+                errors.append(_field_error(
+                    field, "the value is not an integer."))
+            else:
+                errors.append(_field_error(
+                    field, "the value has the wrong type."))
+        elif field in ("captain_invoked_tier", "claimed_tier"):
+            if not isinstance(value, str):
+                errors.append(_field_error(
+                    field, "the value has the wrong type."))
+            elif value not in TIER_ORDER:
+                errors.append(_field_error(
+                    field,
+                    "the value is not one of Low, Medium, High, Extra High, "
+                    "Plaid."))
+    unknown = sorted(
+        name for name in mapping
+        if name not in FIELD_SET and name not in dup_set)
+    for name in unknown:
+        errors.append(_field_error(
+            name, "the field is not in the input record's field set."))
+    if errors:
+        return None, errors
+    record = {}
+    for field in FIELD_ORDER:
+        if field in mapping:
+            record[field] = mapping[field]
+    return record, []
+
+
+class LineResult:
+    def __init__(self, line_id, statement, facts_used, outcome, effect,
+                 note=None, not_deciding=False):
+        self.line_id = line_id
+        self.statement = statement
+        self.facts_used = facts_used
+        self.outcome = outcome
+        self.effect = effect
+        self.note = note
+        self.not_deciding = not_deciding
+
+
+class Evaluation:
+    def __init__(self, read_set, causes, lines, result_tier, result_kind):
+        self.read_set = read_set
+        self.causes = causes
+        self.lines = lines
+        self.result_tier = result_tier
+        self.result_kind = result_kind
+
+
+def evaluate(record):
+    mc = record.get("module_count")
+    mc_is_int = isinstance(mc, int) and not isinstance(mc, bool)
+    read_set = ["handles_money", "security_surface", "public_surface",
+                "private", "module_count"]
+    if mc_is_int and mc <= SMALL_LIMIT:
+        read_set.append("single_deployable_unit")
+    causes = []
+    for field in FIELD_ORDER:
+        if field not in read_set:
+            continue
+        if field == "module_count":
+            if mc_is_int and mc == 0:
+                causes.append(("module_count", "zero"))
+            elif mc == "unknown":
+                causes.append(("module_count", "unknown_count"))
+        elif record.get(field) == "unknown":
+            causes.append((field, "unknown"))
+    hm = record.get("handles_money")
+    ss = record.get("security_surface")
+    ps = record.get("public_surface")
+    pv = record.get("private")
+    sdu = record.get("single_deployable_unit")
+    zero = mc_is_int and mc == 0
+    if any(v == "yes" for v in (hm, ss, ps)):
+        l1 = "fired"
+    elif all(v == "no" for v in (hm, ss, ps)):
+        l1 = "not fired"
+    else:
+        l1 = "unsettled"
+    if zero or mc == "unknown":
+        l2 = "unsettled"
+    elif mc > FEW_LIMIT:
+        l2 = "fired"
+    else:
+        l2 = "not fired"
+    if zero:
+        l3 = "unsettled"
+    elif hm == "yes" or ss == "yes" or (mc_is_int and mc > FEW_LIMIT):
+        l3 = "not met"
+    elif hm == "no" and ss == "no" and mc_is_int and mc <= FEW_LIMIT:
+        l3 = "met"
+    else:
+        l3 = "unsettled"
+    if zero:
+        l4 = "unsettled"
+    else:
+        if mc_is_int and mc <= SMALL_LIMIT:
+            tiny_known_fail = sdu == "no"
+            tiny_holds = sdu == "yes"
+        elif mc_is_int:
+            tiny_known_fail = True
+            tiny_holds = False
+        else:
+            tiny_known_fail = False
+            tiny_holds = False
+        known_fail = (
+            pv == "no" or hm == "yes" or ss == "yes" or ps == "yes"
+            or tiny_known_fail)
+        all_met = (
+            pv == "yes" and hm == "no" and ss == "no" and ps == "no"
+            and tiny_holds)
+        if known_fail:
+            l4 = "not met"
+        elif all_met:
+            l4 = "met"
+        else:
+            l4 = "unsettled"
+    outcomes = {"L1": l1, "L2": l2, "L3": l3, "L4": l4,
+                "L5": "stated", "L6": "stated"}
+
+    def facts_for(line_id):
+        def supplied(field):
+            return (field, "supplied", record.get(field))
+        if line_id == "L1":
+            return [supplied("handles_money"), supplied("security_surface"),
+                    supplied("public_surface")]
+        if line_id == "L2":
+            return [supplied("module_count")]
+        if line_id == "L3":
+            return [supplied("handles_money"), supplied("security_surface"),
+                    supplied("module_count")]
+        if line_id == "L4":
+            entries = [supplied("private"), supplied("handles_money"),
+                       supplied("security_surface"),
+                       supplied("public_surface"), supplied("module_count")]
+            if mc_is_int and mc <= SMALL_LIMIT:
+                entries.append(supplied("single_deployable_unit"))
+            elif mc == "unknown":
+                entries.append(
+                    ("single_deployable_unit", "not applicable unknown", None))
+            else:
+                entries.append(
+                    ("single_deployable_unit", "not applicable above 3",
+                     None))
+            return entries
+        return []
+
+    unsettled = len(causes) > 0
+    if unsettled:
+        result_tier = None
+        result_kind = "unsettled"
+    elif l1 == "fired" or l2 == "fired":
+        result_tier = "High"
+        result_kind = "floor"
+    elif l4 == "met":
+        result_tier = "Low"
+        result_kind = "low"
+    elif l3 == "met":
+        result_tier = "Medium"
+        result_kind = "medium"
+    else:
+        result_tier = "High"
+        result_kind = "default"
+    lines = []
+    for line_id in LINE_IDS:
+        outcome = outcomes[line_id]
+        note = None
+        if line_id == "L3" and outcome == "met":
+            if l1 == "fired" or l2 == "fired":
+                note = FLOOR_OVERRIDE_NOTE
+            elif result_tier == "Low":
+                note = LOW_OVER_MEDIUM_NOTE
+        not_deciding = bool(
+            unsettled and line_id in ("L1", "L2", "L3", "L4")
+            and outcome != "unsettled")
+        lines.append(LineResult(
+            line_id, STATEMENTS[line_id], facts_for(line_id), outcome,
+            EFFECTS[(line_id, outcome)], note, not_deciding))
+    return Evaluation(read_set, causes, lines, result_tier, result_kind)
+
+
+class DeliveryOutcome:
+    def __init__(self, failed, channel=None, error_line=None, status=None):
+        self.failed = failed
+        self.channel = channel
+        self.error_line = error_line
+        self.error_line_text = error_line
+        self.status = status
+
+
+def _write_stderr(text):
+    stream = sys.stderr
+    if stream is not None:
+        try:
+            fd = stream.fileno()
+        except Exception:
+            fd = None
+        if fd is None:
+            try:
+                stream.write(text)
+                stream.flush()
+            except Exception:
+                pass
+            return
+    else:
+        fd = 2
+    data = text.encode("utf-8", "replace")
+    try:
+        offset = 0
+        while offset < len(data):
+            written = os.write(fd, data[offset:])
+            if written <= 0:
+                raise OSError("short write to standard error")
+            offset += written
+        return
+    except Exception:
+        pass
+    if fd == 2:
+        try:
+            devnull_fd = os.open(os.devnull, os.O_WRONLY)
+            try:
+                os.dup2(devnull_fd, 2)
+            finally:
+                os.close(devnull_fd)
+        except Exception:
+            pass
+
+
+def deliver(report, output_arg, report_status):
+    data = report.encode("utf-8")
+    opened = False
+    try:
+        handle = open(output_arg, "wb")
+        opened = True
+        try:
+            handle.write(data)
+            handle.flush()
+        finally:
+            handle.close()
+    except OSError:
+        if opened:
+            try:
+                os.remove(output_arg)
+            except OSError:
+                pass
+        return DeliveryOutcome(
+            True, "file",
+            "delivery failure: cannot write the report to {0}.".format(
+                output_arg))
+    try:
+        if sys.stdout is None:
+            raise AttributeError("standard output is not available")
+        sys.stdout.buffer.write(data)
+        sys.stdout.buffer.flush()
+    except (OSError, ValueError, AttributeError):
+        try:
+            devnull_fd = os.open(os.devnull, os.O_WRONLY)
+            try:
+                os.dup2(devnull_fd, 1)
+            finally:
+                os.close(devnull_fd)
+        except (OSError, ValueError, AttributeError):
+            pass
+        return DeliveryOutcome(
+            True, "stdout",
+            "delivery failure: cannot print the report to standard output.")
+    return DeliveryOutcome(False, None, None, report_status)
+
+
+def _render_value(value):
+    return json.dumps(value, ensure_ascii=False)
+
+
+def _settlement_line(field, kind):
+    if kind == "zero":
+        return (
+            "module_count is 0. To settle: supply the module count of the "
+            "designed product; a count of 0 names no designed product and "
+            "does not settle the test.")
+    if kind == "unknown_count":
+        return (
+            "module_count is unknown. To settle: supply the module count "
+            "of the designed product as an integer of 1 or above.")
+    return '{0} is unknown. To settle: supply {0} as "yes" or "no".'.format(
+        field)
+
+
+def _facts_used_text(entries):
+    parts = []
+    for field, kind, value in entries:
+        if kind == "supplied":
+            parts.append("{0} = {1}".format(field, _render_value(value)))
+        elif kind == "not applicable unknown":
+            parts.append(
+                "single_deployable_unit = not applicable "
+                "(module_count is unknown)")
+        else:
+            parts.append(
+                "single_deployable_unit = not applicable "
+                "(module_count is above 3)")
+    return "; ".join(parts)
+
+
+def render_report(record, fingerprint, evaluation):
+    unsettled = evaluation.result_kind == "unsettled"
+    exit_status = 1 if unsettled else 0
+    lines_by_id = {line.line_id: line for line in evaluation.lines}
+    sections = []
+    sections.append("\n".join([
+        "tier-test " + VERSION,
+        "Tier test report",
+        "This report applies the tier rule and size test of R-4.",
+    ]))
+    result_lines = ["Result"]
+    if unsettled:
+        result_lines.append("Result: unsettled.")
+        result_lines.append(G3_PARAGRAPH)
+        result_lines.append("Unsettled causes:")
+        for field, kind in evaluation.causes:
+            result_lines.append(_settlement_line(field, kind))
+    elif evaluation.result_kind == "floor":
+        result_lines.append("Result: High.")
+        fired = [lid for lid in ("L1", "L2")
+                 if lines_by_id[lid].outcome == "fired"]
+        if fired == ["L1", "L2"]:
+            result_lines.append("Basis: floor lines L1 and L2 fired.")
+        elif fired == ["L1"]:
+            result_lines.append("Basis: floor line L1 fired.")
+        else:
+            result_lines.append("Basis: floor line L2 fired.")
+    elif evaluation.result_kind == "low":
+        result_lines.append("Result: Low.")
+        result_lines.append("Basis: requirement line L4 was met.")
+    elif evaluation.result_kind == "medium":
+        result_lines.append("Result: Medium.")
+        result_lines.append("Basis: requirement line L3 was met.")
+    else:
+        result_lines.append(DEFAULT_RESULT_LINE)
+    sections.append("\n".join(result_lines))
+    table_lines = ["Outcome table"]
+    for line in evaluation.lines:
+        text = "{0}: {1} Outcome: {2}.".format(
+            line.line_id, line.statement, line.outcome)
+        if line.not_deciding:
+            text += NOT_DECIDING_SENTENCE
+        table_lines.append(text)
+    sections.append("\n".join(table_lines))
+    blocks = []
+    for line in evaluation.lines:
+        block = ["{0}: {1}".format(line.line_id, line.statement)]
+        if line.line_id in ("L5", "L6"):
+            block.append("Facts used: none.")
+        else:
+            block.append(
+                "Facts used: " + _facts_used_text(line.facts_used) + ".")
+        outcome_line = "Outcome: {0}.".format(line.outcome)
+        if line.not_deciding:
+            outcome_line += NOT_DECIDING_SENTENCE
+        block.append(outcome_line)
+        block.append(line.effect)
+        if line.note is not None:
+            block.append(line.note)
+        blocks.append("\n".join(block))
+    sections.append("Line by line basis\n\n" + "\n\n".join(blocks))
+    facts_lines = [
+        "Facts as supplied",
+        "Input fingerprint (SHA-256 of the input file bytes): "
+        + fingerprint + ".",
+        "The digest identifies the input file exactly; the same facts "
+        "written with different spacing or key order give a different "
+        "digest.",
+    ]
+    for field in FIELD_ORDER:
+        if field == "facts_note":
+            continue
+        if field in record:
+            facts_lines.append(
+                "{0} = {1}".format(field, _render_value(record[field])))
+        else:
+            facts_lines.append("{0} = not supplied".format(field))
+    facts_lines.append(
+        "Facts as supplied; the tool evaluates the record, it does not "
+        "verify the facts.")
+    facts_lines.append("facts_note")
+    facts_head = "\n".join(facts_lines)
+    tail_sections = []
+    tail_sections.append("\n".join([
+        "Measures applied",
+        "Few is at most {0} modules. Small is at most {1} modules. Tiny "
+        "is at most {1} modules forming one deployable unit. These "
+        "measures are cited to DQ-054.".format(FEW_LIMIT, SMALL_LIMIT),
+        'The single handles_money field serves both source phrases: '
+        '"handles money" in L1 and "money surface" in L3 and L4.',
+        "The input contract in force is the six predicate definitions "
+        "printed in the README.",
+        "Tool version: " + VERSION + ".",
+    ]))
+    supplied_tiers = [f for f in ("captain_invoked_tier", "claimed_tier")
+                      if f in record]
+    if supplied_tiers:
+        comp_blocks = []
+        for field in supplied_tiers:
+            tier = record[field]
+            if field == "captain_invoked_tier":
+                label = (
+                    'captain_invoked_tier = {0}, as supplied by the '
+                    'caller, not validated as an invocation.'.format(
+                        _render_value(tier)))
+                note = INVOKED_NOTE
+            else:
+                label = 'claimed_tier = {0}, as supplied by the caller.'.format(
+                    _render_value(tier))
+                note = CLAIMED_NOTE
+            if unsettled:
+                relation = "No test result stands, so no comparison is made."
+            else:
+                distance = (TIER_ORDER.index(tier)
+                            - TIER_ORDER.index(evaluation.result_tier))
+                if distance < 0:
+                    amount = -distance
+                    word = "tier" if amount == 1 else "tiers"
+                    relation = (
+                        "Shortfall: the supplied tier sits {0} {1} below "
+                        "the test result.".format(amount, word))
+                elif distance == 0:
+                    relation = "The supplied tier matches the test result."
+                else:
+                    word = "tier" if distance == 1 else "tiers"
+                    relation = (
+                        "The supplied tier sits {0} {1} above the test "
+                        "result.".format(distance, word))
+            comp_blocks.append("\n".join([label, relation, note]))
+        tail_sections.append("Comparison\n" + "\n\n".join(comp_blocks))
+    tail_sections.append("\n".join([
+        "Standing notes",
+        "Extra High and Plaid are selected only by Captain JP, and the "
+        "test never gives either.",
+        "This report is the size test basis component of a tier record, "
+        "not a tier record.",
+    ]))
+    fired_or_met = sum(
+        1 for line in evaluation.lines[:4]
+        if line.outcome in ("fired", "met"))
+    not_fired_or_met = sum(
+        1 for line in evaluation.lines[:4]
+        if line.outcome in ("not fired", "not met"))
+    unsettled_count = sum(
+        1 for line in evaluation.lines[:4]
+        if line.outcome == "unsettled")
+    tail_sections.append("\n".join([
+        "Counts",
+        "Lines fired or met: {0}.".format(fired_or_met),
+        "Lines not fired or not met: {0}.".format(not_fired_or_met),
+        "Lines unsettled: {0}.".format(unsettled_count),
+        "Restrictions stated: 2.",
+    ]))
+    tail_sections.append("Exit status: {0}.".format(exit_status))
+    head = "\n\n".join(sections + [facts_head])
+    tail = "\n\n".join(tail_sections)
+    note_text = record["facts_note"]
+    note_suffix = "\n" if note_text.endswith("\n") else "\n\n"
+    return head + "\n" + note_text + note_suffix + tail + "\n"
+
+
+def read_and_gate_input(input_arg, output_arg):
+    try:
+        handle = open(input_arg, "rb")
+    except OSError:
+        raise GateFailure(
+            "input error: cannot read the input file at {0}.".format(input_arg))
+    try:
+        try:
+            size = os.fstat(handle.fileno()).st_size
+        except OSError:
+            raise GateFailure(
+                "input error: cannot read the input file at {0}.".format(
+                    input_arg))
+        if size > INPUT_BYTE_LIMIT:
+            raise GateFailure(
+                "input error: the input file is {0} bytes, over the limit "
+                "of {1} bytes.".format(size, INPUT_BYTE_LIMIT))
+        try:
+            chunks = []
+            total = 0
+            while True:
+                allowance = INPUT_BYTE_LIMIT + 1 - total
+                if allowance <= 0:
+                    break
+                chunk = handle.read(min(65536, allowance))
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                total += len(chunk)
+                if total > INPUT_BYTE_LIMIT:
+                    break
+            data = b"".join(chunks)
+        except OSError:
+            raise GateFailure(
+                "input error: cannot read the input file at {0}.".format(
+                    input_arg))
+        except MemoryError:
+            raise GateFailure(
+                "input error: the input file is {0} bytes, over the limit "
+                "of {1} bytes.".format(
+                    INPUT_BYTE_LIMIT + 1, INPUT_BYTE_LIMIT))
+        input_stat = os.fstat(handle.fileno())
+    finally:
+        handle.close()
+    if len(data) > INPUT_BYTE_LIMIT:
+        raise GateFailure(
+            "input error: the input file is {0} bytes, over the limit "
+            "of {1} bytes.".format(len(data), INPUT_BYTE_LIMIT))
+    fingerprint = hashlib.sha256(data).hexdigest()
+    if data.startswith(b"\xef\xbb\xbf"):
+        raise GateFailure(
+            "input error: the input file is not valid UTF-8 text without "
+            "a byte order mark.")
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        raise GateFailure(
+            "input error: the input file is not valid UTF-8 text without "
+            "a byte order mark.")
+    ok, value, mapping, duplicates = parse_json(text)
+    if not ok:
+        raise GateFailure("input error: the input file is not valid JSON.")
+    if not isinstance(value, dict):
+        raise GateFailure(
+            "input error: the input record is not a JSON object.")
+    same_file = False
+    if os.path.realpath(input_arg) == os.path.realpath(output_arg):
+        same_file = True
+    else:
+        try:
+            output_stat = os.stat(output_arg)
+            if (output_stat.st_dev == input_stat.st_dev
+                    and output_stat.st_ino == input_stat.st_ino):
+                same_file = True
+        except OSError:
+            same_file = False
+    if same_file:
+        raise GateFailure(
+            "input error: the output path is the input file at {0}.".format(
+                output_arg))
+    return data, fingerprint, mapping, duplicates
+
+
+def main(argv=None):
+    if argv is None:
+        args = sys.argv[1:]
+    else:
+        args = list(argv)
+    parsed = parse_arguments(args)
+    if parsed is None:
+        _write_stderr(USAGE_LINE + "\n")
+        return 2
+    input_arg, output_arg = parsed
+    try:
+        data, fingerprint, mapping, duplicates = read_and_gate_input(
+            input_arg, output_arg)
+    except GateFailure as failure:
+        _write_stderr(failure.error_line + "\n")
+        return 2
+    record, errors = validate_fields(mapping, duplicates)
+    if errors:
+        for line in errors:
+            _write_stderr(line + "\n")
+        return 2
+    evaluation = evaluate(record)
+    report = render_report(record, fingerprint, evaluation)
+    report_status = 1 if evaluation.result_kind == "unsettled" else 0
+    outcome = deliver(report, output_arg, report_status)
+    if outcome.failed:
+        _write_stderr(outcome.error_line + "\n")
+        return 2
+    return report_status
+
+
+if __name__ == "__main__":
+    sys.exit(main())

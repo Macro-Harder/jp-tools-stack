@@ -1,0 +1,11 @@
+{
+  "build_ref": "example-pack",
+  "product_ref": "two-units",
+  "handles_money": "no",
+  "security_surface": "no",
+  "public_surface": "no",
+  "private": "yes",
+  "module_count": 3,
+  "single_deployable_unit": "no",
+  "facts_note": "Example facts attested by the tier-test maintainers for illustration. The module inventory counted is the product's design module list of three modules; the three modules ship and run as two deployable units."
+}

@@ -1,0 +1,10 @@
+{
+  "build_ref": "example-build",
+  "product_ref": "example-product",
+  "handles_money": "no",
+  "security_surface": "no",
+  "public_surface": "no",
+  "private": "no",
+  "module_count": 5,
+  "facts_note": "Example facts attested by the tier-test maintainers for illustration. The module inventory counted is the example product's design module list of five modules."
+}
